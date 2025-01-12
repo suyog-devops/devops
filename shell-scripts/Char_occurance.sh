@@ -1,3 +1,4 @@
+#adding comment 
 
 #!/bin/bash
 
