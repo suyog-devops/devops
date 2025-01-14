@@ -1,0 +1,97 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@1476.v90f02a_225559">
+  <actions>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin="pipeline-model-definition@2.2218.v56d0cda_37c72"/>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction plugin="pipeline-model-definition@2.2218.v56d0cda_37c72">
+      <jobProperties/>
+      <triggers/>
+      <parameters/>
+      <options/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>
+  </actions>
+  <description> Jenkins pipeline for a simple Flask app that involves building, testing, and running the application</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@4007.vd705fc76a_34e">
+    <script>pipeline {
+    agent any
+
+    environment {
+        FLASK_APP = &apos;app.py&apos;
+        FLASK_ENV = &apos;development&apos;
+    }
+
+    stages {
+        stage(&apos;Build&apos;) {
+            steps {
+                git &apos;https://github.com/suyog-devops/simple-flask-app.git&apos;
+                echo &quot;Checkout content is - &quot;
+                sh &apos;ls&apos;
+            }
+        }
+
+        stage(&apos;Install Dependencies&apos;) {
+            steps {
+                script {
+                    echo &quot;Setting up virtual environment and installing dependencies...&quot;
+                    // Create and activate the virtual environment, then install dependencies
+                    sh &apos;&apos;&apos;
+                    if [ ! -d &quot;venv&quot; ]; then
+                        python3 -m venv venv  # Create virtual environment if not exists
+                    fi
+                    . venv/bin/activate   # Activate the virtual environment
+                    pip install -r requirements.txt  # Install from requirements.txt
+                    // pip install pytest  # Install pytest
+                    // echo &quot;Checking pytest location:&quot;
+                    // which pytest  # This should return the path to pytest in the virtual environment
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Run App&apos;) {
+            steps {
+                script {
+                    echo &quot;Running the app...&quot;
+                    // Run the Flask app in the background and ensure it starts
+                    sh &apos;&apos;&apos;
+                    . venv/bin/activate  # Re-activate the virtual environment
+                    nohup python3 ${FLASK_APP} &amp;  # Run the Flask app in the background
+                    &apos;&apos;&apos;
+                    // Wait for the app to be ready
+                    echo &quot;Waiting for the Flask app to start...&quot;
+                    sh &apos;&apos;&apos;
+                    curl --max-time 10 http://127.0.0.1:5000/ || exit 1  # Timeout after 10 seconds
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+
+        stage(&apos;Run Tests&apos;) {
+            steps {
+                script {
+                    echo &quot;Running unit tests...&quot;
+                    // Ensure pytest is run from within the virtual environment
+                    sh &apos;&apos;&apos;
+                    . venv/bin/activate  # Re-activate the virtual environment
+                    pytest test-app.py  # Run pytest
+                    &apos;&apos;&apos;
+                }
+            }
+        }
+        stage(&apos;Cleanup&apos;) {
+            steps {
+                script {
+                    echo &quot;Cleaning up...&quot;
+                    sh &apos;deactivate&apos;  // Deactivate virtual environment
+                }
+            }
+        }
+    }
+}
+</script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
