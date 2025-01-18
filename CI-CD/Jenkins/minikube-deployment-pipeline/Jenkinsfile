@@ -1,0 +1,92 @@
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = "C:\\Users\\Suyog.Gandhi\\.kube\\config"
+        NGINX_DEPLOYMENT_YAML_PATH = ".\\CI-CD\\Jenkins\\minikube-deployment-pipeline\\nginx-deployment.yaml"
+        NGINX_SERVICE_NAME = "nginx-service"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                cleanWs()
+                echo "current working directory: "
+                git branch: 'main', url: 'https://github.com/suyog-devops/devops.git'
+                echo "Checkout content is - "
+                bat 'dir'
+            }
+        }
+        stage('Checkout') {
+            steps {
+                echo "Checkout"
+                echo "Jenkins Home Directory: ${env.JENKINS_HOME}"
+                echo "Minikube kubeconfig is present at: ${KUBECONFIG}"
+            }
+        }
+        stage('Start Minikube') {
+            steps {
+                script {
+                    echo 'Starting Minikube'
+
+                    // Ensure kubectl is configured to interact with Minikube
+                    //bat 'minikube status || minikube start'  // Start Minikube if not already running
+                }
+            }
+        }
+        stage('Deploy Nginx on Minikube') {
+            steps {
+                script {
+                    echo 'Deploying Nginx using the Kubernetes YAML file...'
+
+                    // Apply the Kubernetes YAML file from the repo
+                    bat "kubectl apply -f ${NGINX_DEPLOYMENT_YAML_PATH}"
+                }
+            }
+        }
+        stage('Expose Nginx Service') {
+            steps {
+                script {
+                    echo 'Exposing Nginx service...'
+
+                    // Get the Kubernetes node IP (assuming a single node, Minikube)
+                    def node_ip = powershell(script: 'kubectl get nodes -o jsonpath="{.items[0].status.addresses[?(@.type==\'InternalIP\')].address}"', returnStdout: true).trim()
+                    echo "Node IP: ${node_ip}"
+
+                    // Get the NodePort assigned to nginx-service
+                    def node_port = powershell(script: "kubectl get svc ${NGINX_SERVICE_NAME} -o jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim().replaceAll("'", "")
+                    echo "Node Port: ${node_port}"
+
+                    // Construct the URL using the node IP and NodePort
+                    def nginx_url = "http://${node_ip}:${node_port}"
+                    echo "Nginx is exposed at: ${nginx_url}"
+
+                    // Save the URL to use in the next steps
+                    env.NGINX_URL = nginx_url
+                }
+            }
+        }
+        // stage('Test Nginx Endpoint') {
+        //     steps {
+        //         script {
+        //             echo 'Testing the Nginx endpoint...'
+
+        //             // Hit the exposed Nginx endpoint using curl to ensure it's up
+        //             def response = bat(script: "curl -s -o nul -w \"%%{http_code}\" ${NGINX_URL}", returnStdout: true).trim()
+
+        //             if (response == '200') {
+        //                 echo 'Nginx is successfully running and accessible!'
+        //             } else {
+        //                 error "Failed to reach Nginx. HTTP code: ${response}"
+        //             }
+        //         }
+        //     }
+        // }
+    }
+
+    post {
+        always {
+            echo "Pipeline completed"
+        }
+    }
+}
