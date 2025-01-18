@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    environment {
+        KUBECONFIG = "C:\\Users\\Suyog.Gandhi\\.kube\\config"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                git 'https://github.com/suyog-devops/simple-flask-app.git'
+                echo "Checkout content is - "
+                bat 'dir'
+            }
+        }
+        stage('Checkout') {
+            steps {
+                echo "Checkout"
+                echo "Jenkins Home Directory: ${env.JENKINS_HOME}"
+                echo "Minikube kubeconfig is present at: ${KUBECONFIG}"
+            }
+        }
+
+        stage('Deploy Namespace') {
+            steps {
+                script {
+                    // Define the namespace you want to create
+                    def namespace = "your-namespace"
+
+                    // Run the kubectl command to create a namespace in Minikube
+                    bat "kubectl create namespace ${namespace}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "pipeline completed"
+        }
+    }
+}
+a
