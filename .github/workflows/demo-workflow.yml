@@ -9,4 +9,6 @@ jobs:
         run: |
           echo "Hello world"
           pwd
+      - name: checkout action
+        uses: actions/checkout@v4
 
