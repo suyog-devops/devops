@@ -16,4 +16,4 @@ jobs:
           echo test, and deploy your project.
       - name: Event details
         run: |
-          echo ${{ roJSON(github.event) }}
+          echo ${{ toJSON(github.event) }}
