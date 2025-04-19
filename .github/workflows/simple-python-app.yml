@@ -28,3 +28,9 @@ jobs:
       - name: install requirements 
         run: |
           pip install -r CI-CD/GitHub-Actions/simple-python-app/requirements.txt
+      - name: run app 
+        run: |
+          python CI-CD/GitHub-Actions/simple-python-app/app.py
+      - name: test app
+        run: |
+          python -m unittest CI-CD/GitHub-Actions/simple-python-app/test-app.py
