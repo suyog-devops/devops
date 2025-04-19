@@ -1,6 +1,6 @@
 name: issues-workflow
 on:
-  push:
+  #push:
   workflow_dispatch:
 
 jobs:
