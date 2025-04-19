@@ -1,0 +1,12 @@
+name: simple-python-app-github-actions
+on: 
+  workflow_dispatch:
+
+jobs:
+  python-app-build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install python
+        uses: actions/checkout@v4
+        with:
+          ref: github-actions-python-app
