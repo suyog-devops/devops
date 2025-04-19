@@ -2,11 +2,27 @@ name: simple-python-app-github-actions
 on: 
   workflow_dispatch:
 
+# Set minimum required permissions for the workflow
+permissions:
+  contents: read      # needed to checkout code
+
 jobs:
   python-app-build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: install python
+      - name: code checkout from github-actions-python-app branch
         uses: actions/checkout@v4
         with:
           ref: github-actions-python-app
+      - name: setup python 
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: list content
+        run: |
+          echo "Current directory: $PWD"
+          echo "Files in simple-python-app"
+          ls CI-CD/GitHub-Actions/simple-python-app/
+      - name: install requirements 
+        run: |
+          pip install -r CI-CD/GitHub-Actions/simple-python-app/requirements.txt
