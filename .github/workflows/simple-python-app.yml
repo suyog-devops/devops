@@ -56,6 +56,8 @@ jobs:
     needs: python-app-build-and-test
     env:
       APP_DIR: CI-CD/GitHub-Actions/simple-python-app
+      IMAGE_NAME: python-app-image
+      CONTAINER_NAME: python-app-container
     steps:
       - name: code checkout from github-actions-python-app branch
         uses: actions/checkout@v4
@@ -68,14 +70,25 @@ jobs:
       #     password: ${{ secrets.DOCKER_PASSWORD }}
       - name: build docker image
         run: |
-          docker build -f $APP_DIR/Dockerfile -t python-app-image $APP_DIR
+          docker build -f $APP_DIR/Dockerfile -t $IMAGE_NAME $APP_DIR
           docker images
-      - name: Run Docker container
+      - name: run docker container
         run: |
-          docker run -d --name python-app-container python-app-image
+          docker run -d --name $CONTAINER_NAME $IMAGE_NAME
           docker ps
-
-      - name: Clean up
+      - name: clean up docker containers
         run: |
-          docker stop python-app-container || true
-          docker rm python-app-container || true
+          docker stop $CONTAINER_NAME || true
+          docker rm $CONTAINER_NAME || true
+      - name: Set up KinD cluster
+        uses: helm/kind-action@v1.8.0
+
+      - name: Load Docker image into KinD
+        run: kind load docker-image $IMAGE_NAME
+
+      - name: Deploy to Kubernetes via kubectl
+        run: |
+          kubectl get nodes -A
+          kubectl get pods -A
+          kubectl apply -f $APP_DIR/k8s-deployment.yaml
+          kubectl get pods
