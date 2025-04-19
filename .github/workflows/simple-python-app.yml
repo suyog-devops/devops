@@ -31,10 +31,10 @@ jobs:
       - name: list content
         run: |
           echo "Current directory: $PWD"
-          echo "Files in simple-python-app" && ls $APP_DIR
+          echo "Files in simple-python-app" && ls ${{ env.APP_DIR }}
       - name: install requirements 
         run: |
-          FILE=$APP_DIR/requirements.txt
+          FILE=${{ env.APP_DIR }}/requirements.txt
           if [ -f "$FILE" ]; then
             pip install -r "$FILE"
           else
@@ -45,11 +45,11 @@ jobs:
           NAME: Suyog  #variable input to app.py file
           TESTENV: testenv
         run: |
-          python $APP_DIR/app.py
+          python ${{ env.APP_DIR }}/app.py
       - name: test app
         #working-directory: CI-CD/GitHub-Actions/simple-python-app
         run: |
-          cd $APP_DIR
+          cd ${{ env.APP_DIR }}
           python -m unittest discover 
   python-app-deploy:
     runs-on: ubuntu-latest
@@ -70,16 +70,16 @@ jobs:
       #     password: ${{ secrets.DOCKER_PASSWORD }}
       - name: build docker image
         run: |
-          docker build -f $APP_DIR/Dockerfile -t $IMAGE_NAME $APP_DIR
+          docker build -f ${{ env.APP_DIR }}/Dockerfile -t ${{ env.IMAGE_NAME }} ${{ env.APP_DIR }}
           docker images
       - name: run docker container
         run: |
-          docker run -d --name $CONTAINER_NAME $IMAGE_NAME
+          docker run -d --name ${{ env.CONTAINER_NAME }} ${{ env.IMAGE_NAME }}
           docker ps
       - name: clean up docker containers
         run: |
-          docker stop $CONTAINER_NAME || true
-          docker rm $CONTAINER_NAME || true
+          docker stop ${{ env.CONTAINER_NAME }} || true
+          docker rm ${{ env.CONTAINER_NAME }} || true
       - name: Set up KinD cluster
         uses: helm/kind-action@v1.8.0
         with:
@@ -90,12 +90,12 @@ jobs:
           kubectl cluster-info
           kubectl get nodes
           for i in {1..5}; do
-            kind load docker-image $IMAGE_NAME --name kind && break
+            kind load docker-image ${{ env.IMAGE_NAME }} --name kind && break
             echo "Retrying in 5 seconds..." && sleep 5
           done
       - name: Deploy to Kubernetes via kubectl
         run: |
-          kubectl get nodes -A
-          kubectl get pods -A
-          kubectl apply -f $APP_DIR/k8s-deployment.yaml
+          echo "Nodes: " && kubectl get nodes -A
+          echo "Pods: " && kubectl get pods -A
+          kubectl apply -f ${{ env.APP_DIR }}/k8s-deployment.yaml
           kubectl get pods
