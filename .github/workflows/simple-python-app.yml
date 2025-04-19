@@ -9,6 +9,10 @@ on:
     paths:
       - 'CI-CD/GitHub-Actions/simple-python-app/**'
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false  # do not cancel exisitng one
+
 # Set minimum required permissions for the workflow
 permissions:
   contents: read      # needed to checkout code
