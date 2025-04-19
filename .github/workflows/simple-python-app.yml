@@ -44,6 +44,7 @@ jobs:
         run: |
           python $APP_DIR/app.py
       - name: test app
-        working-directory: $APP_DIR
+        #working-directory: CI-CD/GitHub-Actions/simple-python-app
         run: |
+          cd $APP_DIR
           python -m unittest discover 
