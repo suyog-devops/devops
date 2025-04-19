@@ -33,4 +33,5 @@ jobs:
           python CI-CD/GitHub-Actions/simple-python-app/app.py
       - name: test app
         run: |
-          python -m unittest CI-CD/GitHub-Actions/simple-python-app/test-app.py
+          cd CI-CD/GitHub-Actions/simple-python-app
+          python -m unittest discover 
