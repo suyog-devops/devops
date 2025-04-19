@@ -33,10 +33,10 @@ jobs:
       - name: list content
         run: |
           echo "Current directory: $PWD"
-          echo "Files in simple-python-app" && ls $APP_DIR
+          echo "Files in simple-python-app" && ls ${{ env.APP_DIR }}
       - name: install requirements 
         run: |
-          FILE=$APP_DIR/requirements.txt
+          FILE=${{ env.APP_DIR }}/requirements.txt
           if [ -f "$FILE" ]; then
             pip install -r "$FILE"
           else
@@ -47,23 +47,57 @@ jobs:
           NAME: Suyog  #variable input to app.py file
           TESTENV: testenv
         run: |
-          python $APP_DIR/app.py
+          python ${{ env.APP_DIR }}/app.py
       - name: test app
         #working-directory: CI-CD/GitHub-Actions/simple-python-app
         run: |
-          cd $APP_DIR
+          cd ${{ env.APP_DIR }}
           python -m unittest discover 
   python-app-deploy:
     runs-on: ubuntu-latest
     needs: python-app-build-and-test
     env:
       APP_DIR: CI-CD/GitHub-Actions/simple-python-app
+      IMAGE_NAME: python-app-image
+      CONTAINER_NAME: python-app-container
     steps:
       - name: code checkout from github-actions-python-app branch
         uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      # - name: Log in to Docker Hub
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_PASSWORD }}
       - name: build docker image
         run: |
-          docker build -f $APP_DIR/Dockerfile -t pyton-app-image $APP_DIR
+          docker build -f ${{ env.APP_DIR }}/Dockerfile -t ${{ env.IMAGE_NAME }} ${{ env.APP_DIR }}
           docker images
+      - name: run docker container
+        run: |
+          docker run -d --name ${{ env.CONTAINER_NAME }} ${{ env.IMAGE_NAME }}
+          docker ps
+      - name: clean up docker containers
+        run: |
+          docker stop ${{ env.CONTAINER_NAME }} || true
+          docker rm ${{ env.CONTAINER_NAME }} || true
+      - name: Set up KinD cluster
+        uses: helm/kind-action@v1.8.0
+        with:
+          cluster_name: kind
+          wait: 120s  # waits for the cluster to be ready (default is 60s)
+      - name: Load Docker image into KinD
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          for i in {1..5}; do
+            kind load docker-image ${{ env.IMAGE_NAME }} --name kind && break
+            echo "Retrying in 5 seconds..." && sleep 5
+          done
+      - name: Deploy to Kubernetes via kubectl
+        run: |
+          echo "Nodes: " && kubectl get nodes -A
+          echo "Pods: " && kubectl get pods -A
+          kubectl apply -f ${{ env.APP_DIR }}/k8s-deployment.yaml
+          kubectl get pods
