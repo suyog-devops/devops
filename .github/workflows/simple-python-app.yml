@@ -1,7 +1,9 @@
 name: simple-python-app-github-actions
 on: 
   workflow_dispatch:
-
+  push:
+    branches:
+      - github-actions-python-app  # triggers only when code is pushed to the 'abc' branch
 # Set minimum required permissions for the workflow
 permissions:
   contents: read      # needed to checkout code
