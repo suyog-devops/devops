@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - github-actions-python-app  # triggers only when code is pushed to the 'abc' branch
+      - github-actions-python-app  # triggers only when code is pushed to the 'github-actions-python-app' branch
 # Set minimum required permissions for the workflow
 permissions:
   contents: read      # needed to checkout code
@@ -11,30 +11,39 @@ permissions:
 jobs:
   python-app-build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.13]
+    env:
+      APP_DIR: CI-CD/GitHub-Actions/simple-python-app
     steps:
       - name: code checkout from github-actions-python-app branch
         uses: actions/checkout@v4
-        with:
-          ref: github-actions-python-app
+        # with:
+        #   ref: github-actions-python-app
       - name: setup python 
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: ${{ matrix.python-version }}
       - name: list content
         run: |
           echo "Current directory: $PWD"
-          echo "Files in simple-python-app"
-          ls CI-CD/GitHub-Actions/simple-python-app/
+          echo "Files in simple-python-app" && ls $APP_DIR
       - name: install requirements 
         run: |
-          pip install -r CI-CD/GitHub-Actions/simple-python-app/requirements.txt
+          FILE=$APP_DIR/requirements.txt
+          if [ -f "$FILE" ]; then
+            pip install -r "$FILE"
+          else
+            echo "$FILE not found, skipping install"
+          fi
       - name: run app 
         env: 
           NAME: Suyog
           TESTENV: testenv
         run: |
-          python CI-CD/GitHub-Actions/simple-python-app/app.py
+          python $APP_DIR/app.py
       - name: test app
+        working-directory: $APP_DIR
         run: |
-          cd CI-CD/GitHub-Actions/simple-python-app
           python -m unittest discover 
