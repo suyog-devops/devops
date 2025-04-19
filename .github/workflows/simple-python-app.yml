@@ -84,7 +84,7 @@ jobs:
         uses: helm/kind-action@v1.8.0
         with:
           cluster_name: kind
-          wait: 120  # waits for the cluster to be ready (default is 60s)
+          wait: 120s  # waits for the cluster to be ready (default is 60s)
       - name: Load Docker image into KinD
         run: |
           kubectl cluster-info --context kind-chart-testing 
