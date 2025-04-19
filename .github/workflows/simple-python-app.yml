@@ -82,10 +82,17 @@ jobs:
           docker rm $CONTAINER_NAME || true
       - name: Set up KinD cluster
         uses: helm/kind-action@v1.8.0
-
+        with:
+          cluster_name: kind
+          wait: 120  # waits for the cluster to be ready (default is 60s)
       - name: Load Docker image into KinD
-        run: kind load docker-image $IMAGE_NAME
-
+        run: |
+          kubectl cluster-info --context kind-chart-testing 
+          kubectl get nodes
+          for i in {1..5}; do
+            kind load docker-image $IMAGE_NAME --name kind && break
+            echo "Retrying in 5 seconds..." && sleep 5
+          done
       - name: Deploy to Kubernetes via kubectl
         run: |
           kubectl get nodes -A
