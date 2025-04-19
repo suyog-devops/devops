@@ -68,7 +68,7 @@ jobs:
       #     password: ${{ secrets.DOCKER_PASSWORD }}
       - name: build docker image
         run: |
-          docker build -f $APP_DIR/Dockerfile -t pyton-app-image $APP_DIR
+          docker build -f $APP_DIR/Dockerfile -t python-app-image $APP_DIR
           docker images
       - name: Run Docker container
         run: |
