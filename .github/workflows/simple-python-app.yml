@@ -39,7 +39,7 @@ jobs:
           fi
       - name: run app 
         env: 
-          NAME: Suyog
+          NAME: Suyog  #variable input to app.py file
           TESTENV: testenv
         run: |
           python $APP_DIR/app.py
