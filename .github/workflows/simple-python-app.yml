@@ -1,3 +1,5 @@
+#github workflow runs only when changes to path - CI-CD/GitHub-Actions/simple-python-app/** pushed or triggered manually
+
 name: simple-python-app-github-actions
 on: 
   workflow_dispatch:
