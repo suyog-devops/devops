@@ -87,7 +87,7 @@ jobs:
           wait: 120s  # waits for the cluster to be ready (default is 60s)
       - name: Load Docker image into KinD
         run: |
-          kubectl cluster-info --context kind-chart-testing 
+          kubectl cluster-info
           kubectl get nodes
           for i in {1..5}; do
             kind load docker-image $IMAGE_NAME --name kind && break
