@@ -62,7 +62,7 @@ jobs:
           ./sonar-scanner-*/bin/sonar-scanner | tee sonar.log
 
       - name: Upload SonarScanner log as artifact
-        uses: actions/upload-artifact@v3.1.2
+        uses: actions/upload-artifact@v4
         with:
           name: sonar-scanner-log
           path: CI-CD/GitHub-Actions/sample-java-app/sonar.log
