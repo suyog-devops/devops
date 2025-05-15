@@ -22,23 +22,23 @@ jobs:
           java-version: '17'
 
       - name: Build with Maven
-        working-directory: devops/CI-CD/GitHub-Actions/sample-java-app
+        working-directory: CI-CD/GitHub-Actions/sample-java-app
         run: mvn clean compile
 
       - name: Create sonar-project.properties
-        working-directory: devops/CI-CD/GitHub-Actions/sample-java-app
+        working-directory: CI-CD/GitHub-Actions/sample-java-app
         run: |
           echo "creating sonar-project.properties at"
           pwd
           echo "sonar.projectKey=sample-java-app" >> sonar-project.properties
-          echo "sonar.projectName=Sample Java App" >> sonar-project.properties
+          echo "sonars.projectName=Sample Java App" >> sonar-project.properties
           echo "sonar.sources=src" >> sonar-project.properties
           echo "sonar.java.binaries=target" >> sonar-project.properties
-          echo "sonar.host.url=${{ secrets.SONAR_HOST_URL }}" >> sonar-project.properties
+          echo "ssonar.host.url=${{ secrets.SONAR_HOST_URL }}" >> sonar-project.properties
           echo "sonar.login=${{ secrets.SONAR_TOKEN }}" >> sonar-project.properties
 
       - name: Run SonarQube Scanner
-        working-directory: devops/CI-CD/GitHub-Actions/sample-java-app
+        working-directory: CI-CD/GitHub-Actions/sample-java-app
         run: |
           curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
           unzip -q sonar-scanner.zip
