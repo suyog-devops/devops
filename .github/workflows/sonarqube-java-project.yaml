@@ -7,39 +7,62 @@ on:
     #   - github-actions-python-app  # triggers only when code is pushed to the 'github-actions-python-app' branch
     paths:
       - 'CI-CD/GitHub-Actions/sample-java-app/**'
+
 jobs:
-  sonar:
+  sonar-scan:
     runs-on: ubuntu-latest
+    services:
+      sonarqube:
+        image: sonarqube:9.9-community
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd="curl -f http://localhost:9000/api/system/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=30
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK 17
+      - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
       - name: Build with Maven
         working-directory: CI-CD/GitHub-Actions/sample-java-app
         run: mvn clean compile
 
+      - name: Wait for SonarQube to be ready
+        run: |
+          echo "Waiting for SonarQube to be ready..."
+          until curl -s http://localhost:9000/api/system/status | grep -q '"status":"UP"'; do
+            echo -n "."
+            sleep 5
+          done
+          echo "SonarQube is ready."
+
       - name: Create sonar-project.properties
         working-directory: CI-CD/GitHub-Actions/sample-java-app
         run: |
-          echo "creating sonar-project.properties at"
-          pwd
           echo "sonar.projectKey=sample-java-app" >> sonar-project.properties
-          echo "sonars.projectName=Sample Java App" >> sonar-project.properties
+          echo "sonar.projectName=Sample Java App" >> sonar-project.properties
           echo "sonar.sources=src" >> sonar-project.properties
           echo "sonar.java.binaries=target" >> sonar-project.properties
-          echo "ssonar.host.url=${{ secrets.SONAR_HOST_URL }}" >> sonar-project.properties
-          echo "sonar.login=${{ secrets.SONAR_TOKEN }}" >> sonar-project.properties
+          echo "sonar.host.url=http://localhost:9000" >> sonar-project.properties
 
-      - name: Run SonarQube Scanner
+      - name: Download and run SonarScanner
         working-directory: CI-CD/GitHub-Actions/sample-java-app
         run: |
           curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-linux.zip
           unzip -q sonar-scanner.zip
-          ./sonar-scanner-*/bin/sonar-scanner
+          ./sonar-scanner-*/bin/sonar-scanner | tee sonar.log
+
+      - name: Upload SonarScanner log as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sonar-scanner-log
+          path: CI-CD/GitHub-Actions/sample-java-app/sonar.log
