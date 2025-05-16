@@ -7,4 +7,9 @@
     <artifactId>sonarqube-sample</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
+    <properties>
+    <sonar.organization>suyog-devops</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    </properties>
+
 </project>

@@ -16,11 +16,16 @@ jobs:
         image: sonarqube:9.9-community
         ports:
           - 9000:9000
-        options: >-
-          --health-cmd="curl -f http://localhost:9000/api/system/health || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=30
+        # options: >-
+        #   --health-cmd="curl -s http://localhost:9000/api/system/health | grep '\"status\":\"GREEN\"' || exit 1"
+        #   --health-interval=10s
+        #   --health-timeout=5s
+        #   --health-retries=60
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/health"]
+          interval: 10s
+          timeout: 5s
+          retries: 30
 
     steps:
       - name: Checkout code
@@ -62,7 +67,7 @@ jobs:
           ./sonar-scanner-*/bin/sonar-scanner | tee sonar.log
 
       - name: Upload SonarScanner log as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sonar-scanner-log
           path: CI-CD/GitHub-Actions/sample-java-app/sonar.log
