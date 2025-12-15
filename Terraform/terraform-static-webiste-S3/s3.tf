@@ -29,4 +29,20 @@ resource "aws_s3_object" "website" {
   source = "${path.module}/website/${each.value}"
 
   etag = filemd5("${path.module}/website/${each.value}")
+
+  content_type = lookup(
+    {
+      ".html" = "text/html"
+      ".css"  = "text/css"
+      ".js"   = "application/javascript"
+      ".png"  = "image/png"
+      ".jpg"  = "image/jpeg"
+      ".svg"  = "image/svg+xml"
+      ".json" = "application/json"
+    },
+    regex("\\.[^.]+$", each.value),
+    "binary/octet-stream"  # fallback for unknown files
+  )
 }
+
+
