@@ -15,3 +15,6 @@ buildNumber.properties
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+Terraform/terraform-static-webiste-S3/.terraform.lock.hcl
+Terraform/terraform-static-webiste-S3/.terraform/providers/registry.terraform.io/hashicorp/aws/6.26.0/darwin_arm64/LICENSE.txt
+Terraform/terraform-static-webiste-S3/.terraform/providers/registry.terraform.io/hashicorp/aws/6.26.0/darwin_arm64/terraform-provider-aws_v6.26.0_x5
