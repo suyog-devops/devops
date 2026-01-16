@@ -21,8 +21,8 @@ jobs:
       #   run: ls -R Trivy
       - name: Set up Trivy
         uses: aquasecurity/trivy-action@0.33.1
-        with:
-          version: '0.44.0' # specify the Trivy version you want to use
+        # with:
+        #   version: '0.44.0' # specify the Trivy version you want to use
 
       - name: Run Trivy FS Scan
         uses: aquasecurity/trivy-action@0.33.1
