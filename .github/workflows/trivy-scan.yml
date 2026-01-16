@@ -17,6 +17,44 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      
-      - name: display checked out repo 
-        run: ls -R Trivy
+      # - name: display checked out repo 
+      #   run: ls -R Trivy
+      - name: Set up Trivy
+        uses: aquasecurity/trivy-action@v0.10.3
+        with:
+          version: '0.44.0' # specify the Trivy version you want to use
+
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@v0.10.3
+        with:
+          scan-type: 'fs'
+          directory: 'Trivy/app'
+          format: 'json'
+          output: 'trivy-fs-report.json'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+      - name: Upload FS Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report
+          path: trivy-fs-report.json
+
+      - name: Build a docker image
+        run: |
+          docker build -t trivy-scan-app Trivy/.
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@v0.10.3
+        with:
+          scan-type: 'image'
+          image-ref: 'trivy-scan-app:latest'
+          format: 'json'
+          output: 'trivy-image-report.json'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Image Scan Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-image-report
+          path: trivy-image-report.json
