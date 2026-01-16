@@ -20,12 +20,12 @@ jobs:
       # - name: display checked out repo 
       #   run: ls -R Trivy
       - name: Set up Trivy
-        uses: aquasecurity/trivy-action@v0.10.3
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           version: '0.44.0' # specify the Trivy version you want to use
 
       - name: Run Trivy FS Scan
-        uses: aquasecurity/trivy-action@v0.10.3
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'fs'
           directory: 'Trivy/app'
@@ -44,7 +44,7 @@ jobs:
           docker build -t trivy-scan-app Trivy/.
 
       - name: Scan Docker Image with Trivy
-        uses: aquasecurity/trivy-action@v0.10.3
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'image'
           image-ref: 'trivy-scan-app:latest'
