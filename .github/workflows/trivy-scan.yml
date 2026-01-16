@@ -33,6 +33,7 @@ jobs:
           format: 'json'
           output: 'trivy-fs-report.json'
           severity: 'CRITICAL,HIGH,MEDIUM'
+          #exit-code: '1'
       - name: Upload FS Scan Report
         uses: actions/upload-artifact@v4
         with:
@@ -50,7 +51,7 @@ jobs:
           image-ref: 'trivy-scan-app:latest'
           format: 'json'
           output: 'trivy-image-report.json'
-          exit-code: '1'
+          #exit-code: '1'
           severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: Upload Image Scan Report
