@@ -6,7 +6,8 @@ on:
       - 'Trivy/**'
     branches:
       - trivy-scan
-      
+      - main
+
   workflow_dispatch:
 
 jobs:
