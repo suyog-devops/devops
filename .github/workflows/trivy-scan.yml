@@ -1,0 +1,19 @@
+name: trivy-scan-workflow
+
+on:
+  pull_request:
+    paths:
+      - 'Trivy/**'
+    branches:
+      - trivy-scan
+
+jobs:
+  trivy-scan-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: display checked out repo 
+        run: ls -R Trivy
