@@ -6,7 +6,7 @@ on:
       - 'Trivy/**'
     branches:
       - trivy-scan
-      - main
+      # - main
 
   workflow_dispatch:
 
@@ -33,9 +33,10 @@ jobs:
           format: 'json'
           output: 'trivy-fs-report.json'
           severity: 'CRITICAL,HIGH,MEDIUM'
-          #exit-code: '1'
+          exit-code: '1'
       - name: Upload FS Scan Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: trivy-fs-report
           path: trivy-fs-report.json
@@ -51,11 +52,12 @@ jobs:
           image-ref: 'trivy-scan-app:latest'
           format: 'json'
           output: 'trivy-image-report.json'
-          #exit-code: '1'
+          exit-code: '1'
           severity: 'CRITICAL,HIGH,MEDIUM'
 
       - name: Upload Image Scan Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: trivy-image-report
           path: trivy-image-report.json
