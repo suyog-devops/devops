@@ -1,0 +1,63 @@
+name: trivy-scan-workflow
+
+on:
+  pull_request:
+    paths:
+      - 'Trivy/**'
+    branches:
+      - trivy-scan
+      # - main
+
+  workflow_dispatch:
+
+jobs:
+  trivy-scan-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      # - name: display checked out repo 
+      #   run: ls -R Trivy
+      # Install Trivy binary
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@v0.2.3
+        with:
+          version: "latest"
+
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          input: 'Trivy/app'
+          format: 'json'
+          output: 'trivy-fs-report.json'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          exit-code: '1'
+      - name: Upload FS Scan Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-fs-report
+          path: trivy-fs-report.json
+
+      - name: Build a docker image
+        run: |
+          docker build -t trivy-scan-app Trivy/.
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'image'
+          image-ref: 'trivy-scan-app:latest'
+          format: 'json'
+          output: 'trivy-image-report.json'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload Image Scan Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-image-report
+          path: trivy-image-report.json
